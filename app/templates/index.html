@@ -1,7 +1,26 @@
 {% extends "base.html" %}
 
 {% block content %}
+
+<style>
+    /* Default State (Inactive Tabs): White background, Black text */
+    .nav-pills .nav-link {
+        background-color: white;
+        color: black;
+        border: 1px solid #e5e7eb; /* Light gray border */
+        transition: all 0.2s ease;
+    }
+
+    /* Active State (Selected Tab): Black background, White text */
+    .nav-pills .nav-link.active {
+        background-color: black !important;
+        color: white !important;
+        border-color: black !important;
+    }
+</style>
+
 <div class="container pt-4 pb-3">
+    
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h1 class="fw-black m-0" style="font-weight: 900; letter-spacing: -1px;">Tasks</h1>
@@ -47,13 +66,13 @@
 
     <ul class="nav nav-pills mb-4 gap-2" id="pills-tab" style="overflow-x: auto; flex-wrap: nowrap; padding-bottom: 5px;">
         <li class="nav-item">
-            <button class="nav-link active rounded-pill px-3 py-1 small fw-bold border" data-bs-toggle="pill" data-bs-target="#all" style="background-color: black; border-color: black;">All</button>
+            <button class="nav-link active rounded-pill px-3 py-1 small fw-bold" data-bs-toggle="pill" data-bs-target="#all">All</button>
         </li>
         <li class="nav-item">
-            <button class="nav-link rounded-pill px-3 py-1 small fw-bold border bg-white text-dark" data-bs-toggle="pill" data-bs-target="#high">High Priority</button>
+            <button class="nav-link rounded-pill px-3 py-1 small fw-bold" data-bs-toggle="pill" data-bs-target="#high">High Priority</button>
         </li>
         <li class="nav-item">
-            <button class="nav-link rounded-pill px-3 py-1 small fw-bold border bg-white text-dark" data-bs-toggle="pill" data-bs-target="#completed">Completed</button>
+            <button class="nav-link rounded-pill px-3 py-1 small fw-bold" data-bs-toggle="pill" data-bs-target="#completed">Completed</button>
         </li>
     </ul>
 
@@ -95,4 +114,5 @@
         }
     });
 </script>
+
 {% endblock %}
