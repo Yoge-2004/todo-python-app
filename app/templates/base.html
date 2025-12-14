@@ -2,22 +2,47 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <meta name="theme-color" content="#4f46e5">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#ffffff">
     <title>{% block title %}TaskFlow{% endblock %}</title>
-    <meta name="description" content="Outstanding Todo App">
     
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <style>
-        :root { --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f3f4f6; }
-        .btn-gradient { background: var(--primary-gradient); color: white; border: none; }
-        .btn-gradient:hover { opacity: 0.9; color: white; }
-        .fade-in { animation: fadeIn 0.6s ease-out forwards; }
+        :root {
+            --primary: #000000;
+            --accent: #2563eb; /* Royal Blue */
+            --bg-body: #ffffff;
+            --bg-surface: #f8fafc;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-radius: 16px;
+        }
+
+        body {
+            font-family: 'Satoshi', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Smooth Fade In */
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Custom Toast (Notification) */
+        .custom-toast {
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            backdrop-filter: blur(10px);
+            border-radius: 50px;
+            padding: 12px 24px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            font-weight: 500;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -25,29 +50,39 @@
         {% block content %}{% endblock %}
     </div>
 
-    <div class="toast-container position-fixed bottom-0 end-0 p-3">
-        <div id="liveToast" class="toast align-items-center text-bg-dark border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 1050; margin-top: 10px;">
+        <div id="liveToast" class="toast align-items-center border-0 custom-toast" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
-                <div class="toast-body" id="toastMessage">Notification</div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                <div class="toast-body d-flex align-items-center gap-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <span id="toastMessage">Notification</span>
+                </div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function getCookie(name) {
-            const v = `; ${document.cookie}`;
-            const parts = v.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
-        }
         document.addEventListener('DOMContentLoaded', () => {
+            function getCookie(name) {
+                const v = `; ${document.cookie}`;
+                const parts = v.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+            }
+
             const msg = getCookie('flash_msg');
             if (msg) {
-                const cleanMsg = decodeURIComponent(msg.replace(/\+/g, ' '));
+                // 1. Decode URL encoding (removes %20, etc.)
+                let cleanMsg = decodeURIComponent(msg.replace(/\+/g, ' '));
+                
+                // 2. Remove leading/trailing quotes (The Fix)
+                cleanMsg = cleanMsg.replace(/^"|"$/g, '');
+
                 document.getElementById('toastMessage').innerText = cleanMsg;
-                const toast = new bootstrap.Toast(document.getElementById('liveToast'));
+                const toast = new bootstrap.Toast(document.getElementById('liveToast'), { delay: 3000 });
                 toast.show();
+
+                // Clear cookie
                 document.cookie = "flash_msg=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
             }
         });
