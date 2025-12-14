@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<nav class="navbar navbar-light bg-white shadow-sm mb-4 px-3 sticky-top">
+    <span class="navbar-brand fw-bold text-primary"><i class="bi bi-check-circle-fill"></i> TaskFlow</span>
+    <a href="/logout" class="btn btn-sm btn-outline-danger rounded-pill">Logout</a>
+</nav>
+
+<div class="container pb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow border-0 rounded-4 mb-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3">New Task</h5>
+                    <form action="/add" method="post" class="row g-2">
+                        <div class="col-12"><input type="text" name="title" class="form-control bg-light" placeholder="What needs doing?" required></div>
+                        <div class="col-6"><input type="date" name="deadline" class="form-control bg-light" required></div>
+                        <div class="col-6">
+                            <select name="priority" class="form-select bg-light">
+                                <option value="Normal">Normal</option>
+                                <option value="High">High 🔥</option>
+                                <option value="Low">Low ☕</option>
+                            </select>
+                        </div>
+                        <div class="col-12 mt-3"><button type="submit" class="btn btn-gradient w-100 rounded-pill fw-bold">Add Task</button></div>
+                    </form>
+                </div>
+            </div>
+
+            <ul class="nav nav-pills mb-3 justify-content-center gap-2" id="pills-tab">
+                <li class="nav-item"><button class="nav-link active rounded-pill px-4" data-bs-toggle="pill" data-bs-target="#all">All</button></li>
+                <li class="nav-item"><button class="nav-link rounded-pill px-4" data-bs-toggle="pill" data-bs-target="#high">High Priority</button></li>
+            </ul>
+
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="all">
+                    {% for task in tasks if task.status.name != 'COMPLETED' %}
+                        {% include 'partials/task_item.html' %}
+                    {% else %}<p class="text-center text-muted mt-4">No pending tasks.</p>{% endfor %}
+                </div>
+                <div class="tab-pane fade" id="high">
+                    {% for task in tasks if task.priority.name == 'HIGH' and task.status.name != 'COMPLETED' %}
+                        {% include 'partials/task_item.html' %}
+                    {% else %}<p class="text-center text-muted mt-4">No high priority tasks.</p>{% endfor %}
+                </div>
+            </div>
+            
+            <h6 class="text-muted text-uppercase fw-bold mt-5 mb-3 text-center">Completed</h6>
+            {% for task in tasks if task.status.name == 'COMPLETED' %}
+                {% include 'partials/task_item.html' %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
