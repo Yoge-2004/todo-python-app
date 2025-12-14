@@ -3,15 +3,53 @@
 <div class="d-flex align-items-center justify-content-center min-vh-100 px-3">
     <div class="card shadow-lg border-0 rounded-4 w-100" style="max-width: 400px;">
         <div class="card-body p-5">
-            <h2 class="fw-bold text-center text-primary mb-4">Signup</h2>
-            {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
-            <form action="/signup" method="post">
-                <div class="mb-3"><input type="text" name="username" class="form-control" placeholder="Username" required></div>
-                <div class="mb-3"><input type="password" name="password" class="form-control" placeholder="Password" required></div>
-                <button class="btn btn-gradient w-100 rounded-pill fw-bold">Sign In</button>
+            <h2 class="fw-bold text-center text-primary mb-4">Create Account</h2>
+            
+            {% if error %}
+            <div class="alert alert-danger d-flex align-items-center" role="alert">
+                <i class="bi bi-exclamation-circle-fill me-2"></i> {{ error }}
+            </div>
+            {% endif %}
+
+            <form action="/signup" method="post" onsubmit="return validatePassword()">
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted">EMAIL ADDRESS</label>
+                    <input type="email" name="username" class="form-control" placeholder="name@example.com" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted">PASSWORD</label>
+                    <input type="password" id="pass1" name="password" class="form-control" placeholder="Min 6 chars" minlength="6" required>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label small fw-bold text-muted">CONFIRM PASSWORD</label>
+                    <input type="password" id="pass2" class="form-control" placeholder="Re-type password" required>
+                    <div id="passError" class="text-danger small mt-1" style="display:none;">Passwords do not match!</div>
+                </div>
+
+                <button class="btn btn-gradient w-100 rounded-pill fw-bold">Sign Up</button>
             </form>
-            <div class="text-center mt-3"><a href="/signup" class="text-decoration-none">Create Account</a></div>
+            
+            <div class="text-center mt-3">
+                <span class="text-muted">Already have an account?</span> 
+                <a href="/login" class="text-decoration-none fw-bold">Login</a>
+            </div>
         </div>
     </div>
 </div>
+
+<script>
+    function validatePassword() {
+        const p1 = document.getElementById("pass1").value;
+        const p2 = document.getElementById("pass2").value;
+        const errorMsg = document.getElementById("passError");
+
+        if (p1 !== p2) {
+            errorMsg.style.display = "block";
+            return false; // Stop form submission
+        }
+        return true; // Allow submission
+    }
+</script>
 {% endblock %}
