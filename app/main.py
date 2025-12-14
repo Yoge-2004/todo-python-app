@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from fastapi import FastAPI, Depends, Request, Form, BackgroundTasks, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -15,14 +16,17 @@ templates = Jinja2Templates(directory="app/templates")
 
 # --- EMAIL CONFIG ---
 conf = ConnectionConfig(
-    MAIL_USERNAME=os.environ.get("MAIL_USERNAME", "example@gmail.com"),
-    MAIL_PASSWORD=os.environ.get("MAIL_PASSWORD", "app-password"),
-    MAIL_FROM=os.environ.get("MAIL_USERNAME", "example@gmail.com"),
+    MAIL_USERNAME=os.environ.get("MAIL_USERNAME", "your-email@gmail.com"),
+    MAIL_PASSWORD=os.environ.get("MAIL_PASSWORD", "your-app-password"),
+    MAIL_FROM=os.environ.get("MAIL_USERNAME", "your-email@gmail.com"),
     MAIL_PORT=587,
     MAIL_SERVER="smtp.gmail.com",
     MAIL_STARTTLS=True,
     MAIL_SSL_TLS=False,
-    USE_CREDENTIALS=True
+    USE_CREDENTIALS=True,
+    VALIDATE_CERTS=True,
+    # vvv ADD THIS LINE vvv
+    TEMPLATE_FOLDER=Path(__file__).parent / 'templates' 
 )
 
 async def send_email_async(subject: str, email_to: str, body: dict):
