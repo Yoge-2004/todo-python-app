@@ -1,16 +1,52 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="d-flex align-items-center justify-content-center min-vh-100 px-3">
-    <div class="card shadow-lg border-0 rounded-4 w-100" style="max-width: 400px;">
-        <div class="card-body p-5">
-            <h2 class="fw-bold text-center text-primary mb-4">Login</h2>
-            {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
-            <form action="/login" method="post">
-                <div class="mb-3"><input type="text" name="username" class="form-control" placeholder="Username" required></div>
-                <div class="mb-3"><input type="password" name="password" class="form-control" placeholder="Password" required></div>
-                <button class="btn btn-gradient w-100 rounded-pill fw-bold">Sign In</button>
-            </form>
-            <div class="text-center mt-3"><a href="/signup" class="text-decoration-none">Create Account</a></div>
+<div class="d-flex align-items-center justify-content-center px-3" style="min-height: 80vh;">
+    <div class="glass-container w-100" style="max-width: 420px; padding: 2.5rem 2rem;">
+        <div class="text-center mb-4">
+            <!-- App Logo/Header -->
+            <div class="d-inline-flex align-items-center justify-content-center rounded-4 mb-3" 
+                 style="width: 52px; height: 52px; background: var(--primary-grad); box-shadow: 0 8px 20px var(--primary-glow);">
+                <i class="bi bi-check-all text-white fs-2"></i>
+            </div>
+            <h2 class="fw-bold m-0" style="letter-spacing: -0.5px; font-weight: 800; background: var(--primary-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                TaskFlow
+            </h2>
+            <p class="small mt-1" style="color: #a5b4fc;">Sign in to manage your productivity</p>
+        </div>
+
+        {% if error %}
+        <div class="alert alert-danger d-flex align-items-center border-0 rounded-4 py-2 px-3 mb-4" 
+             style="background: rgba(239, 68, 68, 0.15); color: #f87171; font-size: 0.85rem;" role="alert">
+            <i class="bi bi-exclamation-circle-fill me-2"></i>
+            <div>{{ error }}</div>
+        </div>
+        {% endif %}
+
+        <form action="/login" method="post">
+            <div class="mb-3">
+                <label class="form-label small fw-bold text-secondary mb-2" style="font-size: 0.75rem; letter-spacing: 0.5px;">USERNAME OR EMAIL</label>
+                <div class="position-relative">
+                    <i class="bi bi-person position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary" style="font-size: 1.1rem;"></i>
+                    <input type="text" name="username" class="form-control glass-input w-100 ps-5" placeholder="Enter username" required>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label small fw-bold text-secondary mb-2" style="font-size: 0.75rem; letter-spacing: 0.5px;">PASSWORD</label>
+                <div class="position-relative">
+                    <i class="bi bi-lock position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary" style="font-size: 1.1rem;"></i>
+                    <input type="password" name="password" class="form-control glass-input w-100 ps-5" placeholder="Enter password" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-gradient w-100 rounded-3 py-2 fw-bold mb-3" style="font-size: 0.95rem;">
+                Sign In
+            </button>
+        </form>
+
+        <div class="text-center mt-2">
+            <span class="small" style="color: #a5b4fc;">New to TaskFlow?</span>
+            <a href="/signup" class="text-decoration-none fw-bold small ms-1" style="color: #8b5cf6;">Create Account</a>
         </div>
     </div>
 </div>

@@ -3,58 +3,277 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#ffffff">
+    <meta name="theme-color" content="#03001e">
     <title>{% block title %}TaskFlow{% endblock %}</title>
     
-    <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Premium Fonts & Icons -->
+    <link href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
         :root {
-            --primary: #000000;
-            --accent: #2563eb; /* Royal Blue */
-            --bg-body: #ffffff;
-            --bg-surface: #f8fafc;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --border-radius: 16px;
+            --bg-body: #030014;
+            --bg-surface: rgba(15, 12, 38, 0.6);
+            --bg-card: rgba(22, 17, 56, 0.45);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-color-glow: rgba(168, 85, 247, 0.25);
+            
+            --text-primary: #ffffff;
+            --text-secondary: #d4d8f3;   /* was #c7d2fe — boosted for LCD */
+            --text-muted: #a5b4fc;       /* was #818cf8 — boosted for LCD */
+            
+            --primary-grad: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+            --primary-glow: rgba(168, 85, 247, 0.4);
+            
+            --secondary-grad: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+            --secondary-glow: rgba(6, 182, 212, 0.35);
+            
+            --accent-grad: linear-gradient(135deg, #f43f5e 0%, #fb923c 100%);
+            --accent-glow: rgba(244, 63, 94, 0.3);
+            
+            --success-grad: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --success-glow: rgba(16, 185, 129, 0.3);
+
+            --font-sans: 'Satoshi', sans-serif;
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         body {
-            font-family: 'Satoshi', sans-serif;
+            font-family: var(--font-sans);
             background-color: var(--bg-body);
-            color: var(--text-main);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
             -webkit-font-smoothing: antialiased;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
-        /* Smooth Fade In */
-        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* Animated Glowing Aurora Backgrounds */
+        .aurora-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -2;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .aurora-blob-1, .aurora-blob-2, .aurora-blob-3 {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(140px);
+            opacity: 0.35;
+        }
+
+        .aurora-blob-1 {
+            width: 50vw;
+            height: 50vw;
+            top: -15%;
+            left: -10%;
+            background: radial-gradient(circle, #7c3aed, transparent 70%);
+            animation: float-aurora-1 20s ease-in-out infinite alternate;
+        }
+
+        .aurora-blob-2 {
+            width: 55vw;
+            height: 55vw;
+            bottom: -20%;
+            right: -10%;
+            background: radial-gradient(circle, #db2777, transparent 70%);
+            animation: float-aurora-2 25s ease-in-out infinite alternate-reverse;
+        }
+
+        .aurora-blob-3 {
+            width: 35vw;
+            height: 35vw;
+            top: 40%;
+            left: 50%;
+            background: radial-gradient(circle, #06b6d4, transparent 70%);
+            animation: float-aurora-3 18s ease-in-out infinite alternate;
+        }
+
+        @keyframes float-aurora-1 {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(8%, 12%) scale(1.15); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
+        @keyframes float-aurora-2 {
+            0% { transform: translate(0, 0) scale(1.1); }
+            50% { transform: translate(-10%, -8%) scale(0.95); }
+            100% { transform: translate(0, 0) scale(1.1); }
+        }
+
+        @keyframes float-aurora-3 {
+            0% { transform: translate(-10%, 10%) scale(0.9); }
+            50% { transform: translate(12%, -8%) scale(1.1); }
+            100% { transform: translate(-10%, 10%) scale(0.9); }
+        }
+
+        /* Custom Modern Scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(3, 0, 20, 0.4);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(168, 85, 247, 0.25);
+            border-radius: 10px;
+            border: 2px solid #030014;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(168, 85, 247, 0.5);
+        }
+
+        /* Smooth Stagger Fade In */
+        .fade-in { 
+            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+        }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(20px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+
+        /* Premium Glassmorphic Container */
+        .glass-container {
+            background: var(--bg-surface);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border: 1px solid var(--border-color);
+            border-radius: 28px;
+            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6), 
+                        inset 0 1px 3px rgba(255, 255, 255, 0.08);
+            transition: var(--transition-smooth);
+        }
+
+        /* Sleek Input Fields */
+        .glass-input {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary) !important;
+            border-radius: 14px;
+            padding: 0.8rem 1.2rem;
+            transition: var(--transition-smooth);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .glass-input:focus {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: #a855f7;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.35), inset 0 2px 4px rgba(0,0,0,0.1);
+            outline: none;
+        }
+        .glass-input::placeholder {
+            color: #9ca3c4; /* explicit readable placeholder colour */
+        }
+
+        /* ── Bootstrap override: keep muted/secondary readable on dark LCD ── */
+        .text-muted {
+            color: #a5b4fc !important;
+        }
+        .text-secondary {
+            color: #d4d8f3 !important;
+        }
+
+        .glass-select {
+            background-color: rgba(15, 12, 38, 0.95) !important;
+            color: var(--text-primary) !important;
+            border: 1px solid var(--border-color) !important;
+            border-radius: 12px !important;
+            padding: 0.6rem 1.2rem !important;
+            transition: var(--transition-smooth) !important;
+            cursor: pointer;
+            box-shadow: none !important;
+        }
+        .glass-select:focus {
+            border-color: #a855f7 !important;
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.2) !important;
+        }
 
         /* Custom Toast (Notification) */
         .custom-toast {
-            background: rgba(0, 0, 0, 0.9);
-            color: white;
-            backdrop-filter: blur(10px);
+            background: rgba(15, 12, 38, 0.95);
+            border: 1px solid var(--border-color-glow);
+            color: var(--text-primary);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border-radius: 50px;
             padding: 12px 24px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-            font-weight: 500;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 0 0 15px rgba(168, 85, 247, 0.15);
+            font-weight: 600;
             font-size: 14px;
+        }
+
+        /* Buttons with Gradient and Glow */
+        .btn-gradient {
+            background: var(--primary-grad);
+            border: none;
+            color: white !important;
+            font-weight: 700;
+            transition: var(--transition-smooth);
+            box-shadow: 0 4px 15px var(--primary-glow);
+        }
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(168, 85, 247, 0.6);
+        }
+        .btn-gradient:active {
+            transform: translateY(0);
+        }
+
+        .btn-icon {
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: var(--transition-smooth);
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+        .btn-icon:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-primary);
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 5px 15px rgba(255,255,255,0.05);
+        }
+        .btn-icon-danger:hover {
+            background: rgba(244, 63, 94, 0.15);
+            color: #f43f5e;
+            border-color: rgba(244, 63, 94, 0.35);
+            box-shadow: 0 5px 15px rgba(244,63,94,0.15);
         }
     </style>
 </head>
 <body>
-    <div class="fade-in">
+    <!-- Aurora background elements -->
+    <div class="aurora-bg">
+        <div class="aurora-blob-1"></div>
+        <div class="aurora-blob-2"></div>
+        <div class="aurora-blob-3"></div>
+    </div>
+
+    <div class="fade-in py-4 py-md-5">
         {% block content %}{% endblock %}
     </div>
 
+    <!-- Notification Toast -->
     <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 1050; margin-top: 10px;">
         <div id="liveToast" class="toast align-items-center border-0 custom-toast" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
                 <div class="toast-body d-flex align-items-center gap-2">
-                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <i class="bi bi-info-circle-fill text-info" id="toastIcon"></i>
                     <span id="toastMessage">Notification</span>
                 </div>
             </div>
@@ -72,17 +291,23 @@
 
             const msg = getCookie('flash_msg');
             if (msg) {
-                // 1. Decode URL encoding (removes %20, etc.)
                 let cleanMsg = decodeURIComponent(msg.replace(/\+/g, ' '));
-                
-                // 2. Remove leading/trailing quotes (The Fix)
                 cleanMsg = cleanMsg.replace(/^"|"$/g, '');
 
-                document.getElementById('toastMessage').innerText = cleanMsg;
-                const toast = new bootstrap.Toast(document.getElementById('liveToast'), { delay: 3000 });
+                const toastMessageEl = document.getElementById('toastMessage');
+                const toastIconEl = document.getElementById('toastIcon');
+                
+                toastMessageEl.innerText = cleanMsg;
+                
+                if (cleanMsg.toLowerCase().includes('error') || cleanMsg.toLowerCase().includes('fail')) {
+                    toastIconEl.className = 'bi bi-exclamation-triangle-fill text-danger';
+                } else {
+                    toastIconEl.className = 'bi bi-check-circle-fill text-success';
+                }
+
+                const toast = new bootstrap.Toast(document.getElementById('liveToast'), { delay: 4000 });
                 toast.show();
 
-                // Clear cookie
                 document.cookie = "flash_msg=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
             }
         });

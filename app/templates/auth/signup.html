@@ -1,40 +1,62 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="d-flex align-items-center justify-content-center min-vh-100 px-3">
-    <div class="card shadow-lg border-0 rounded-4 w-100" style="max-width: 400px;">
-        <div class="card-body p-5">
-            <h2 class="fw-bold text-center text-primary mb-4">Create Account</h2>
-            
-            {% if error %}
-            <div class="alert alert-danger d-flex align-items-center" role="alert">
-                <i class="bi bi-exclamation-circle-fill me-2"></i> {{ error }}
+<div class="d-flex align-items-center justify-content-center px-3" style="min-height: 80vh;">
+    <div class="glass-container w-100" style="max-width: 420px; padding: 2.5rem 2rem;">
+        <div class="text-center mb-4">
+            <div class="d-inline-flex align-items-center justify-content-center rounded-4 mb-3" 
+                 style="width: 52px; height: 52px; background: var(--primary-grad); box-shadow: 0 8px 20px var(--primary-glow);">
+                <i class="bi bi-person-plus text-white fs-2"></i>
             </div>
-            {% endif %}
+            <h2 class="fw-bold m-0" style="letter-spacing: -0.5px; font-weight: 800; background: var(--primary-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                Create Account
+            </h2>
+            <p class="small mt-1" style="color: #a5b4fc;">Get started with a free TaskFlow account</p>
+        </div>
 
-            <form action="/signup" method="post" onsubmit="return validatePassword()">
-                <div class="mb-3">
-                    <label class="form-label small fw-bold text-muted">EMAIL ADDRESS</label>
-                    <input type="email" name="username" class="form-control" placeholder="name@example.com" required>
-                </div>
-                
-                <div class="mb-3">
-                    <label class="form-label small fw-bold text-muted">PASSWORD</label>
-                    <input type="password" id="pass1" name="password" class="form-control" placeholder="Min 6 chars" minlength="6" required>
-                </div>
+        {% if error %}
+        <div class="alert alert-danger d-flex align-items-center border-0 rounded-4 py-2 px-3 mb-4" 
+             style="background: rgba(239, 68, 68, 0.15); color: #f87171; font-size: 0.85rem;" role="alert">
+            <i class="bi bi-exclamation-circle-fill me-2"></i>
+            <div>{{ error }}</div>
+        </div>
+        {% endif %}
 
-                <div class="mb-4">
-                    <label class="form-label small fw-bold text-muted">CONFIRM PASSWORD</label>
-                    <input type="password" id="pass2" class="form-control" placeholder="Re-type password" required>
-                    <div id="passError" class="text-danger small mt-1" style="display:none;">Passwords do not match!</div>
+        <form action="/signup" method="post" onsubmit="return validatePassword()">
+            <div class="mb-3">
+                <label class="form-label small fw-bold text-secondary mb-2" style="font-size: 0.75rem; letter-spacing: 0.5px;">EMAIL ADDRESS</label>
+                <div class="position-relative">
+                    <i class="bi bi-envelope position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary" style="font-size: 1.1rem;"></i>
+                    <input type="email" name="username" class="form-control glass-input w-100 ps-5" placeholder="name@example.com" required>
                 </div>
-
-                <button class="btn btn-gradient w-100 rounded-pill fw-bold">Sign Up</button>
-            </form>
-            
-            <div class="text-center mt-3">
-                <span class="text-muted">Already have an account?</span> 
-                <a href="/login" class="text-decoration-none fw-bold">Login</a>
             </div>
+
+            <div class="mb-3">
+                <label class="form-label small fw-bold text-secondary mb-2" style="font-size: 0.75rem; letter-spacing: 0.5px;">PASSWORD</label>
+                <div class="position-relative">
+                    <i class="bi bi-shield-lock position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary" style="font-size: 1.1rem;"></i>
+                    <input type="password" id="pass1" name="password" class="form-control glass-input w-100 ps-5" placeholder="At least 6 characters" minlength="6" required>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label small fw-bold text-secondary mb-2" style="font-size: 0.75rem; letter-spacing: 0.5px;">CONFIRM PASSWORD</label>
+                <div class="position-relative">
+                    <i class="bi bi-shield-check position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary" style="font-size: 1.1rem;"></i>
+                    <input type="password" id="pass2" class="form-control glass-input w-100 ps-5" placeholder="Re-type password" required>
+                </div>
+                <div id="passError" class="text-danger small mt-2" style="display:none; font-size: 0.8rem;">
+                    <i class="bi bi-x-circle me-1"></i> Passwords do not match!
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-gradient w-100 rounded-3 py-2 fw-bold mb-3" style="font-size: 0.95rem;">
+                Sign Up
+            </button>
+        </form>
+
+        <div class="text-center mt-2">
+            <span class="small" style="color: #a5b4fc;">Already have an account?</span>
+            <a href="/login" class="text-decoration-none fw-bold small ms-1" style="color: #8b5cf6;">Login</a>
         </div>
     </div>
 </div>
@@ -47,9 +69,10 @@
 
         if (p1 !== p2) {
             errorMsg.style.display = "block";
-            return false; // Stop form submission
+            return false;
         }
-        return true; // Allow submission
+        errorMsg.style.display = "none";
+        return true;
     }
 </script>
 {% endblock %}

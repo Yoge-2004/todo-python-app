@@ -2,105 +2,356 @@
 
 {% block content %}
 
-<style>
-    /* Default State (Inactive Tabs): White background, Black text */
-    .nav-pills .nav-link {
-        background-color: white;
-        color: black;
-        border: 1px solid #e5e7eb; /* Light gray border */
-        transition: all 0.2s ease;
-    }
+{% set total_tasks = tasks|length %}
+{% set completed_count = namespace(value=0) %}
+{% set high_count = namespace(value=0) %}
+{% set pending_count = namespace(value=0) %}
+{% for t in tasks %}
+    {% if t.status.name == 'COMPLETED' %}
+        {% set completed_count.value = completed_count.value + 1 %}
+    {% else %}
+        {% set pending_count.value = pending_count.value + 1 %}
+        {% if t.priority.name == 'HIGH' %}
+            {% set high_count.value = high_count.value + 1 %}
+        {% endif %}
+    {% endif %}
+{% endfor %}
 
-    /* Active State (Selected Tab): Black background, White text */
-    .nav-pills .nav-link.active {
-        background-color: black !important;
+{% set completion_rate = 0 %}
+{% if total_tasks > 0 %}
+    {% set completion_rate = ((completed_count.value / total_tasks) * 100)|round|int %}
+{% endif %}
+
+<style>
+    /* Dashboard-specific Layout Grid */
+    .dashboard-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    .sidebar-panel {
+        order: 2;
+    }
+    .main-panel {
+        order: 1;
+    }
+    @media (min-width: 992px) {
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 310px 1fr;
+            gap: 2rem;
+        }
+        .sidebar-panel {
+            order: 1;
+        }
+        .main-panel {
+            order: 2;
+        }
+    }
+    
+    /* Stat Card aesthetics */
+    .stat-card {
+        background: linear-gradient(145deg, rgba(25, 20, 60, 0.45), rgba(15, 12, 40, 0.45));
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 22px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255,255,255,0.05);
+        transition: var(--transition-smooth);
+    }
+    .stat-card:hover {
+        border-color: rgba(168, 85, 247, 0.25);
+        transform: translateY(-2px);
+        box-shadow: 0 15px 30px rgba(168, 85, 247, 0.12);
+    }
+    
+    /* Custom task cards with gradient indicator tags */
+    .task-card {
+        background: linear-gradient(145deg, rgba(22, 17, 56, 0.5), rgba(14, 10, 36, 0.5));
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 18px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+    .task-card::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 5px;
+        background: transparent;
+        transition: all 0.3s ease;
+    }
+    .task-card:hover {
+        transform: translateY(-2px) scale(1.005);
+        border-color: rgba(168, 85, 247, 0.35);
+        box-shadow: 0 12px 25px rgba(168, 85, 247, 0.18);
+        background: linear-gradient(145deg, rgba(30, 25, 75, 0.6), rgba(18, 14, 48, 0.6));
+    }
+    .task-card.priority-high::before {
+        background: var(--accent-grad);
+    }
+    .task-card.priority-normal::before {
+        background: var(--secondary-grad);
+    }
+    .task-card.priority-low::before {
+        background: linear-gradient(180deg, #64748b 0%, #475569 100%);
+    }
+    
+    .task-checkbox {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.35);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        color: transparent;
+        cursor: pointer;
+    }
+    .task-checkbox:hover {
+        border-color: #a855f7;
+        color: rgba(168, 85, 247, 0.6);
+        transform: scale(1.1);
+    }
+    .task-checkbox.completed {
+        background: var(--primary-grad);
+        border-color: transparent;
+        color: white;
+        box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+    }
+    
+    /* Navigation Pill Styles */
+    .custom-nav-pills .nav-link {
+        background: rgba(255, 255, 255, 0.02);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 100px;
+        padding: 0.6rem 1.4rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+        transition: var(--transition-smooth);
+    }
+    .custom-nav-pills .nav-link:hover {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text-primary);
+    }
+    .custom-nav-pills .nav-link.active {
+        background: var(--primary-grad) !important;
+        border-color: transparent !important;
         color: white !important;
-        border-color: black !important;
+        box-shadow: 0 4px 15px var(--primary-glow);
+    }
+    /* Tighter pill padding on very small screens */
+    @media (max-width: 380px) {
+        .custom-nav-pills .nav-link {
+            padding: 0.45rem 0.9rem;
+            font-size: 0.8rem;
+        }
+    }
+    
+    /* Scrollable tasks container */
+    .scroll-pane {
+        max-height: 520px;
+        overflow-y: auto;
+        padding-right: 5px;
+    }
+    /* Let sidebar scroll independently on short desktop viewports */
+    @media (min-width: 992px) {
+        .sidebar-panel {
+            max-height: calc(100vh - 4rem);
+            overflow-y: auto;
+        }
     }
 </style>
 
-<div class="container pt-4 pb-3">
-    
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="fw-black m-0" style="font-weight: 900; letter-spacing: -1px;">Tasks</h1>
-            <p class="text-muted m-0 small">{{ user.username }}</p>
-        </div>
+<div class="container py-4" style="max-width: 1100px;">
+    <div class="dashboard-layout">
         
-        <div class="d-flex gap-2">
-            <a href="/delete_account" 
-               onclick="return confirm('Are you sure? This will delete your account and ALL tasks permanently.')"
-               class="btn btn-outline-danger rounded-circle" 
-               style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;"
-               title="Delete Account">
-                <i class="bi bi-trash3-fill"></i>
-            </a>
-
-            <a href="/logout" class="btn btn-light rounded-circle" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;" title="Logout">
-                <i class="bi bi-box-arrow-right"></i>
-            </a>
-        </div>
-    </div>
-
-    <div class="card border-0 shadow-sm mb-4" style="background: var(--bg-surface); border-radius: 20px;">
-        <div class="card-body p-2">
-            <form action="/add" method="post" class="d-flex flex-column gap-2">
-                <input type="text" name="title" class="form-control border-0 bg-transparent py-2 px-3 fw-bold" style="box-shadow: none; font-size: 1.1rem;" placeholder="What needs to be done?" required>
+        <!-- Left Side: Profile & Stats & Task Creator -->
+        <div class="d-flex flex-column gap-4 sidebar-panel">
+            
+            <!-- User Profile card -->
+            <div class="stat-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex align-items-center gap-2.5">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" 
+                             style="width: 38px; height: 38px; background: var(--primary-grad); color: white;">
+                            <i class="bi bi-person-fill" style="font-size: 1.1rem;"></i>
+                        </div>
+                        <div style="min-width: 0;">
+                            <h6 class="m-0 fw-bold text-white text-truncate" style="max-width: 140px;">{{ user.username.split('@')[0] }}</h6>
+                            <span class="text-secondary" style="font-size: 0.72rem;">Active Session</span>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-1.5">
+                        <a href="/logout" class="btn-icon" style="width: 32px; height: 32px;" title="Logout">
+                            <i class="bi bi-box-arrow-right" style="font-size: 0.8rem;"></i>
+                        </a>
+                        <a href="/delete_account" 
+                           onclick="return confirm('Are you sure? This will delete your account and ALL tasks permanently.')"
+                           class="btn-icon btn-icon-danger" style="width: 32px; height: 32px;"
+                           title="Delete Account">
+                            <i class="bi bi-trash3-fill" style="font-size: 0.8rem;"></i>
+                        </a>
+                    </div>
+                </div>
                 
-                <div class="d-flex gap-2 px-2 pb-1">
-                    <input type="date" name="deadline" class="form-control border-0 bg-white shadow-sm" style="border-radius: 12px; font-size: 0.85rem; width: auto;" required>
+                <!-- Live Task completion Rate -->
+                <div class="mt-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-secondary small fw-bold" style="font-size: 0.75rem;">COMPLETION RATE</span>
+                        <span class="fw-bold text-white" style="font-size: 0.85rem;">{{ completion_rate }}%</span>
+                    </div>
+                    <div class="progress" style="height: 6px; background: rgba(255,255,255,0.06); border-radius: 10px; overflow: hidden;">
+                        <div class="progress-bar" role="progressbar" style="width: {{ completion_rate }}%; background: var(--primary-grad); border-radius: 10px;" aria-valuenow="{{ completion_rate }}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-2" style="font-size: 0.7rem;">
+                        <span class="text-muted">{{ completed_count.value }} of {{ total_tasks }} tasks done</span>
+                        {% if completion_rate == 100 and total_tasks > 0 %}
+                            <span class="text-success fw-bold">All clean! 🎉</span>
+                        {% elif completion_rate > 70 %}
+                            <span class="text-info fw-bold">Almost there! ⚡</span>
+                        {% else %}
+                            <span class="text-muted">Keep it up!</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Card -->
+            <div class="stat-card p-4">
+                <h6 class="fw-bold text-secondary mb-3" style="font-size: 0.75rem; letter-spacing: 0.5px;">TASK SUMMARY</h6>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <div class="p-3 rounded-4 text-center" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04);">
+                            <span class="d-block fw-bold mb-1" style="font-size: 0.7rem; color: #a5b4fc; letter-spacing: 0.5px;">PENDING</span>
+                            <span class="fs-4 fw-black text-white" style="font-weight: 800;">{{ pending_count.value }}</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 rounded-4 text-center" style="background: rgba(244, 63, 94, 0.05); border: 1px solid rgba(244, 63, 94, 0.1);">
+                            <span class="d-block text-danger small mb-1" style="font-size: 0.7rem;">URGENT</span>
+                            <span class="fs-4 fw-black text-danger" style="font-weight: 800;">{{ high_count.value }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Task Form -->
+            <div class="stat-card p-4">
+                <h6 class="fw-bold text-secondary mb-3" style="font-size: 0.75rem; letter-spacing: 0.5px;">CREATE NEW TASK</h6>
+                <form action="/add" method="post" class="d-flex flex-column gap-3">
+                    <div>
+                        <input type="text" name="title" class="form-control glass-input py-2.5 w-100" 
+                               style="font-size: 0.9rem;" placeholder="Task description..." required>
+                    </div>
                     
-                    <select name="priority" class="form-select border-0 bg-white shadow-sm" style="border-radius: 12px; font-size: 0.85rem; width: auto; cursor: pointer;">
-                        <option value="Normal">Normal</option>
-                        <option value="High">High Priority</option>
-                        <option value="Low">Low Priority</option>
-                    </select>
+                    <!-- Date Input -->
+                    <div class="position-relative d-flex align-items-center">
+                        <i class="bi bi-calendar-event text-secondary position-absolute pointer-events-none" style="left: 14px; z-index: 10;"></i>
+                        <input type="date" name="deadline" class="form-control glass-input w-100" 
+                               style="font-size: 0.85rem; padding: 0.55rem 0.8rem 0.55rem 2.6rem !important;" required>
+                    </div>
+                    
+                    <!-- Priority Select -->
+                    <div class="position-relative d-flex align-items-center">
+                        <i class="bi bi-flag text-secondary position-absolute pointer-events-none" style="left: 14px; z-index: 10;"></i>
+                        <select name="priority" class="form-select glass-select w-100" 
+                                style="font-size: 0.85rem; padding: 0.55rem 1.8rem 0.55rem 2.6rem !important;">
+                            <option value="Normal">Normal Priority</option>
+                            <option value="High">High Priority</option>
+                            <option value="Low">Low Priority</option>
+                        </select>
+                    </div>
 
-                    <button type="submit" class="btn btn-primary rounded-circle ms-auto d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background-color: black; border: none;">
-                        <i class="bi bi-arrow-up text-white"></i>
+                    <button type="submit" class="btn btn-gradient w-100 rounded-3 py-2.5 fw-bold d-flex align-items-center justify-content-center gap-2">
+                        <i class="bi bi-plus-lg"></i> Create Task
                     </button>
+                </form>
+            </div>
+            
+        </div>
+
+        <!-- Right Side: Tasks and Filter Options -->
+        <div class="glass-container p-4 p-md-5 main-panel">
+            <!-- Title -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="fw-bold m-0 text-white" style="font-weight: 900; letter-spacing: -1.5px; font-size: 2rem;">Tasks Flow</h2>
+                    <p class="text-secondary small m-0 mt-0.5">Organize and execute tasks efficiently</p>
                 </div>
-            </form>
-        </div>
-    </div>
+            </div>
 
-    <ul class="nav nav-pills mb-4 gap-2" id="pills-tab" style="overflow-x: auto; flex-wrap: nowrap; padding-bottom: 5px;">
-        <li class="nav-item">
-            <button class="nav-link active rounded-pill px-3 py-1 small fw-bold" data-bs-toggle="pill" data-bs-target="#all">All</button>
-        </li>
-        <li class="nav-item">
-            <button class="nav-link rounded-pill px-3 py-1 small fw-bold" data-bs-toggle="pill" data-bs-target="#high">High Priority</button>
-        </li>
-        <li class="nav-item">
-            <button class="nav-link rounded-pill px-3 py-1 small fw-bold" data-bs-toggle="pill" data-bs-target="#completed">Completed</button>
-        </li>
-    </ul>
+            <!-- Filter Tabs -->
+            <ul class="nav nav-pills custom-nav-pills mb-4 gap-2" id="pills-tab" style="overflow-x: auto; flex-wrap: nowrap; padding-bottom: 8px;">
+                <li class="nav-item">
+                    <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#all">All Pending</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#high">High Priority</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#completed">Completed</button>
+                </li>
+            </ul>
 
-    <div class="tab-content pb-5">
-        
-        <div class="tab-pane fade show active" id="all">
-            {% for task in tasks if task.status.name != 'COMPLETED' %}
-                {% include 'partials/task_item.html' %}
-            {% else %}
-                <div class="text-center py-5 text-muted opacity-50">
-                    <i class="bi bi-check2-circle display-1"></i>
-                    <p class="mt-3">No tasks pending</p>
+            <!-- Tasks List Content Pane -->
+            <div class="tab-content">
+                
+                <div class="tab-pane fade show active" id="all">
+                    <div class="scroll-pane">
+                        {% for task in tasks if task.status.name != 'COMPLETED' %}
+                            {% include 'partials/task_item.html' %}
+                        {% else %}
+                            <div class="text-center py-5">
+                                <div class="d-inline-flex align-items-center justify-content-center rounded-circle p-4 mb-3" 
+                                     style="background: rgba(16, 185, 129, 0.18); border: 1px solid rgba(16,185,129,0.25); width: 80px; height: 80px;">
+                                    <i class="bi bi-check2-circle text-success fs-1"></i>
+                                </div>
+                                <h5 class="fw-bold text-white mb-1">All caught up!</h5>
+                                <p class="small mb-0" style="color: #a5b4fc;">You have no pending tasks to complete.</p>
+                            </div>
+                        {% endfor %}
+                    </div>
                 </div>
-            {% endfor %}
-        </div>
 
-        <div class="tab-pane fade" id="high">
-            {% for task in tasks if task.priority.name == 'HIGH' and task.status.name != 'COMPLETED' %}
-                {% include 'partials/task_item.html' %}
-            {% else %}
-                <p class="text-center text-muted mt-5 small">No high priority tasks.</p>
-            {% endfor %}
-        </div>
+                <div class="tab-pane fade" id="high">
+                    <div class="scroll-pane">
+                        {% for task in tasks if task.priority.name == 'HIGH' and task.status.name != 'COMPLETED' %}
+                            {% include 'partials/task_item.html' %}
+                        {% else %}
+                            <div class="text-center py-5">
+                                <div class="d-inline-flex align-items-center justify-content-center rounded-circle p-4 mb-3" 
+                                     style="background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168,85,247,0.25); width: 80px; height: 80px;">
+                                    <i class="bi bi-shield-check fs-1" style="color: #c084fc;"></i>
+                                </div>
+                                <h5 class="fw-bold text-white mb-1">No high priority tasks</h5>
+                                <p class="small mb-0" style="color: #a5b4fc;">Everything is running smoothly.</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
 
-        <div class="tab-pane fade" id="completed">
-            {% for task in tasks if task.status.name == 'COMPLETED' %}
-                {% include 'partials/task_item.html' %}
-            {% endfor %}
+                <div class="tab-pane fade" id="completed">
+                    <div class="scroll-pane">
+                        {% for task in tasks if task.status.name == 'COMPLETED' %}
+                            {% include 'partials/task_item.html' %}
+                        {% else %}
+                            <div class="text-center py-5">
+                                <div class="d-inline-flex align-items-center justify-content-center rounded-circle p-4 mb-3" 
+                                     style="background: rgba(6, 182, 212, 0.15); border: 1px solid rgba(6,182,212,0.25); width: 80px; height: 80px;">
+                                    <i class="bi bi-archive fs-1" style="color: #22d3ee;"></i>
+                                </div>
+                                <h5 class="fw-bold text-white mb-1">No completed tasks yet</h5>
+                                <p class="small mb-0" style="color: #a5b4fc;">Finish some tasks to see them archived here.</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -108,7 +359,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const dateInput = document.querySelector('input[name="deadline"]');
-        if(dateInput) {
+        if (dateInput) {
             // Set min attribute to today's date in YYYY-MM-DD format
             dateInput.min = new Date().toISOString().split("T")[0];
         }
