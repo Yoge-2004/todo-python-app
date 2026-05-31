@@ -56,24 +56,28 @@ cd todo-python-app
 ```
 
 ### 2. Create a Virtual Environment
-Create and activate a virtual environment to manage dependencies:
+Create a virtual environment using `uv`:
 ```bash
 # Create environment
-python -m venv .venv
+uv venv
+```
 
-# Activate environment (macOS/Linux)
+To activate the virtual environment:
+```bash
+# macOS/Linux
 source .venv/bin/activate
 
-# Activate environment (Windows Command Prompt)
+# Windows Command Prompt
 .venv\Scripts\activate
 
-# Activate environment (Windows PowerShell)
+# Windows PowerShell
 .venv\Scripts\Activate.ps1
 ```
 
 ### 3. Install Dependencies
+Install the required packages using `uv pip`:
 ```bash
-pip install -r requirements.txt
+uv pip install -r requirements.txt
 ```
 
 ---
@@ -98,9 +102,9 @@ The app auto-detects its environment and configurations. To enable optional feat
 
 ## 🏃 Running the Application
 
-Start the local Uvicorn development server:
+Start the local Uvicorn development server using `uv run`:
 ```bash
-uvicorn app.main:app --reload
+uv run uvicorn app.main:app --reload
 ```
 Once started, open your browser and navigate to:
 👉 **[http://127.0.0.1:8000](http://127.0.0.1:8000)**
@@ -109,12 +113,15 @@ Once started, open your browser and navigate to:
 
 ## 🧪 Development & Code Quality
 
-To format and lint code before submitting contributions, it is recommended to use standard linting utilities:
+To format and lint code before submitting contributions, you can run formatting and linting utilities using `uv`:
 ```bash
-pip install black isort flake8
-black .
-isort .
-flake8 app/
+# Install development tools
+uv pip install black isort flake8
+
+# Run formatting and linting
+uv run black .
+uv run isort .
+uv run flake8 app/
 ```
 
 ---
